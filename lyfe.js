@@ -21,23 +21,21 @@ Iterator.prototype = {
     take: function (n) {
         var source = this;
         return Generator(function () {
-            var i = 0, gen = this;
-            source.forEach(function (val) {
-                if (i >= n)
+            var gen = this;
+            source.forEach(function (val, index) {
+                if (index >= n)
                     gen.stop();
                 gen.yield(val);
-                i++;
             });
         });
     },
     skip: function (n) {
         var source = this;
         return Generator(function () {
-            var gen = this, i = 0;
-            source.forEach(function(val) {
-                if (i >= n)
+            var gen = this;
+            source.forEach(function(val, index) {
+                if (index >= n)
                     gen.yield(val);
-                i++;
             });
         });
     },
