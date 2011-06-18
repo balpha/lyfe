@@ -55,15 +55,13 @@ Iterator.prototype = {
         var source = this;
         
         return Generator(function () {
-            var i = 0,
-                len = arr.length,
+            var len = arr.length,
                 gen = this;
                 
-            source.forEach(function (val) {
-                if (i >= len)
+            source.forEach(function (val, index) {
+                if (index >= len)
                     gen.stop();
-                gen.yield(zipper(val, arr[i]));
-                i++;
+                gen.yield(zipper(val, arr[index]));
             });
         });
     },
