@@ -226,8 +226,7 @@
         
         var inner = Generator(function () {
             try {
-                var that = this;
-                Generator([1, 2, 3, 4]).forEach(function (val) { that.yield(val); });
+                this.yieldMany(Generator([1, 2, 3, 4]));
             } finally {
                 innerClean = true;
             }
@@ -256,8 +255,7 @@
         
         var inner = Generator(function () {
             try {
-                var that = this;
-                Generator([1, 2, 3, 4]).forEach(function (val) { that.yield(val); });
+                this.yieldMany(Generator([1, 2, 3, 4]));
             } finally {
                 innerClean = true;
             }
