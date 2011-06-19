@@ -187,6 +187,29 @@
         return (g.skip(2).first() === helloWorld) && (typeof g.skip(20).first() === "undefined");
     });
     
+    test("groupBy", function () {
+        var grouped = Generator(a).groupBy(function (v) { return (typeof v).substr(1,1) });
+        var expected_groups = ["u", "b", "t"];
+        var expected_contents = {
+            u: [13, helloWorld, -10.5],
+            b: [null],
+            t: ["lolcat"]
+        };
+        good = true;
+        grouped.forEach(function (val) {
+            var g = expected_groups.shift();
+            if (val.key !== g) {
+                good = false;
+                return;
+            }
+            if (!arrEqual(val.toArray(), expected_contents[g]))
+                good = false;
+        });
+        return good;
+            
+    
+    });
+    
     test("send to yield", function () {
         var gen = Generator(function () {
             this.yield("first");
@@ -277,7 +300,6 @@
         var result = outer.toArray();
         return arrEqual(result, [1, 2]) && innerClean && outerClean;
     });
-    
     
     test("yieldMany", function () {
         

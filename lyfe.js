@@ -1,3 +1,13 @@
+function arrIndexOf(arr, val) {
+    if (arr.indexOf)
+        return arr.indexOf(val);
+    var len = arr.length;
+    for (var i = 0; i < len; i++)
+        if (arr[i] === val)
+            return i;
+    return -1;
+}
+
 BreakIteration = new Error();
 
 Iterator = function () {};
@@ -147,6 +157,27 @@ Iterator.prototype = {
             stop();
         });
         return result;
+    },
+    groupBy: function (grouper) {
+        var groups = [],
+            group_contents = [];
+            
+        this.forEach(function (val) {
+            var group = grouper(val);
+            var i = arrIndexOf(groups, group);
+            if (i === -1) {
+                groups.push(group);
+                group_contents.push([val]);
+            } else {
+                group_contents[i].push(val);
+            }
+        });
+        
+        return Generator(groups).zipWithArray(group_contents, function (group, contents) {
+            var result = Generator(contents);
+            result.key = group;
+            return result;
+        });
     }
 }
 
