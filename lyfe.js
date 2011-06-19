@@ -211,8 +211,8 @@ Generator.fromFunction = function (f) {
 }
 
 Generator.fromArray = function (arr) {
-    var len = arr.length;
     return Generator.fromFunction(function () {
+        var len = arr.length;
         for (var i = 0; i < len; i++)
             this.yield(arr[i]);
     });

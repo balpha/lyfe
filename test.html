@@ -320,6 +320,13 @@
         return arrEqual(flatten(nested).toArray(), [1, 7, 9, 3, 1, 8, 5, 2, 2, 3, 4]);
     });
     
+    test("changing source array", function () {
+        var arr = ["x", 42, null];
+        var gen = Generator(arr);
+        arr.push(helloWorld);
+        return arrEqual(gen.toArray(), arr);
+    });
+
 </script>
 
 
