@@ -1,13 +1,16 @@
 (function () {
 
-    function arrIndexOf(arr, val) {
-        if (arr.indexOf)
-            return arr.indexOf(val);
-        var len = arr.length;
-        for (var i = 0; i < len; i++)
-            if (arr[i] === val)
-                return i;
-        return -1;
+    var arrIndexOf;
+    if (Array.prototype.indexOf) {
+        arrIndexOf = function (arr, val) { return arr.indexOf(val); };
+    } else {
+        arrIndexOf = function (arr, val) {
+            var len = arr.length;
+            for (var i = 0; i < len; i++)
+                if (arr[i] === val)
+                    return i;
+            return -1;
+        };
     }
 
     var BreakIteration = new Error();
