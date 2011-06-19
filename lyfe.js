@@ -231,7 +231,7 @@
                 return result;
             });
         },
-        evaluate: function () {
+        evaluated: function () {
             return new Generator(this.toArray());
         }
     }
