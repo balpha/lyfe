@@ -230,6 +230,9 @@
                 result.key = group;
                 return result;
             });
+        },
+        evaluate: function () {
+            return new Generator(this.toArray());
         }
     }
 

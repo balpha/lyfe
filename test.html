@@ -326,6 +326,16 @@
         arr.push(helloWorld);
         return arrEqual(gen.toArray(), arr);
     });
+    
+    test("evaluate", function () {
+        var called = 0;
+        var square = function (x) { called++; return x * x; };
+        var numbers = Generator([1, 3, 5]);
+        var squares = numbers.map(square).evaluate();
+        
+        var doubled = squares.and(squares).toArray()
+        return arrEqual(doubled, [1, 9, 25, 1, 9, 25]) && called == 3;
+    });
 
 </script>
 
