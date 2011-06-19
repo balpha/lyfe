@@ -69,7 +69,7 @@
         },
         filter: function (pred) {
             var source = this;
-            return Generator(function () {
+            return new Generator(function () {
                 var gen = this;
                 source.forEach(function (val) {
                     if (pred(val))
@@ -79,7 +79,7 @@
         },
         take: function (n) {
             var source = this;
-            return Generator(function () {
+            return new Generator(function () {
                 var gen = this;
                 source.forEach(function (val, index) {
                     if (index >= n)
@@ -90,7 +90,7 @@
         },
         skip: function (n) {
             var source = this;
-            return Generator(function () {
+            return new Generator(function () {
                 var gen = this;
                 source.forEach(function(val, index) {
                     if (index >= n)
@@ -100,7 +100,7 @@
         },
         map: function (f) {
             var source = this;
-            return Generator(function () {
+            return new Generator(function () {
                 var gen = this;
                 source.forEach(function (val) {
                     gen.yield(f(val));
@@ -113,7 +113,7 @@
             
             var source = this;
             
-            return Generator(function () {
+            return new Generator(function () {
                 var len = arr.length,
                     gen = this;
                     
@@ -147,7 +147,7 @@
         },
         and: function (other) {
             var source = this;
-            return Generator(function () {
+            return new Generator(function () {
                 this.yieldMany(source);
                 this.yieldMany(other);
             });
@@ -155,7 +155,7 @@
         takeWhile: function (pred) {
             var source = this;
             
-            return Generator(function () {
+            return new Generator(function () {
                 var gen = this;
                 source.forEach(function (val) {
                     if (pred(val))
@@ -168,7 +168,7 @@
         skipWhile: function (pred) {
             var source = this;
             
-            return Generator(function () {
+            return new Generator(function () {
                 var gen = this,
                     skipping = true;
                     
@@ -222,8 +222,8 @@
                 }
             });
             
-            return Generator(groups).zipWithArray(group_contents, function (group, contents) {
-                var result = Generator(contents);
+            return new Generator(groups).zipWithArray(group_contents, function (group, contents) {
+                var result = new Generator(contents);
                 result.key = group;
                 return result;
             });
@@ -239,7 +239,7 @@
         var i = start;
         if (typeof step === "undefined")
             step = 1;
-        return Generator(function () {
+        return new Generator(function () {
             while (true) {
                 this.yield(i);
                 i += step;
