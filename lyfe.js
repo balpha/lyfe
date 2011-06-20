@@ -13,7 +13,7 @@
         };
     }
 
-    var BreakIteration = new Error();
+    var BreakIteration = {};
 
     var Generator = function (source) {
         if (!(this instanceof Generator))
@@ -236,12 +236,7 @@
         }
     }
 
-    window.Generator = Generator;
-    window.Lyfe = {
-        BreakIteration: BreakIteration
-    };
-    
-    Lyfe.Count = function (start, step) {
+    var Count = function (start, step) {
         var i = start;
         if (typeof step === "undefined")
             step = 1;
@@ -253,9 +248,14 @@
         });
     }
 
-    Lyfe.Range = function (start, len) {
+    var Range = function (start, len) {
         return Count(start, 1).take(len);
     }
+
+    window.Generator = Generator;
+    Generator.BreakIteration = BreakIteration;
+    Generator.Count = Count;
+    Generator.Range = Range;
     
 })();
 
