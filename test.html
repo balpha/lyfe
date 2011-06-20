@@ -363,6 +363,13 @@
         gen.forEach(function (x) { good2 = this === obj; }, obj);
         return good1 && good2;
     });
+    
+    test("array constructor doesn't yield unset/deleted elements", function () {
+        var arr = [2, undefined, "bla", helloWorld, false];
+        arr[12] = "late";
+        delete arr[3];
+        return arrEqual(Generator(arr).toArray(), [2, undefined, "bla", false, "late"]);
+    });
 
 </script>
 

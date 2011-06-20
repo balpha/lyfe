@@ -52,7 +52,8 @@
         return makeForEach_fromFunction(function () {
             var len = arr.length;
             for (var i = 0; i < len; i++)
-                this.yield(arr[i]);
+                if (i in arr)
+                    this.yield(arr[i]);
         });
     };
     
