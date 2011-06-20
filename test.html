@@ -336,6 +336,33 @@
         var doubled = squares.and(squares).toArray()
         return arrEqual(doubled, [1, 9, 25, 1, 9, 25]) && called == 3;
     });
+    
+    test("thisObj argument to filter", function () {
+        var good1, good2;
+        var obj = { foo: 123 };
+        var gen = Generator([42]);
+        gen.filter(function (x) { good1 = this === window; return true; }).toArray();
+        gen.filter(function (x) { good2 = this === obj; return true; }, obj).toArray();
+        return good1 && good2;
+    });
+
+    test("thisObj argument to map", function () {
+        var good1, good2;
+        var obj = { foo: 123 };
+        var gen = Generator([42]);
+        gen.map(function (x) { good1 = this === window; return 43; }).toArray();
+        gen.map(function (x) { good2 = this === obj; return 43; }, obj).toArray();
+        return good1 && good2;
+    });
+
+    test("thisObj argument to forEach", function () {
+        var good1, good2;
+        var obj = { foo: 123 };
+        var gen = Generator([42]);
+        gen.forEach(function (x) { good1 = this === window; });
+        gen.forEach(function (x) { good2 = this === obj; }, obj);
+        return good1 && good2;
+    });
 
 </script>
 

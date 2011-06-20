@@ -32,10 +32,10 @@
     };
 
     var makeForEach_fromFunction = function (f) {
-        return function (g) {
+        return function (g, thisObj) {
             var index = 0,
                 gen = {
-                    yield: function (val) { var send = g(val, index, stopIteration); index++; return send; },
+                    yield: function (val) { var send = g.call(thisObj, val, index, stopIteration); index++; return send; },
                     yieldMany: function (source) { source.forEach(function (val) { gen.yield(val); }) },
                     stop: stopIteration
                 };
@@ -70,12 +70,12 @@
             this.forEach(function (val) { result.push(val); });
             return result;
         },
-        filter: function (pred) {
+        filter: function (pred, thisObj) {
             var source = this;
             return new Generator(function () {
                 var gen = this;
                 source.forEach(function (val) {
-                    if (pred(val))
+                    if (pred.call(thisObj, val))
                         gen.yield(val);
                 });
             });
@@ -101,12 +101,12 @@
                 });
             });
         },
-        map: function (f) {
+        map: function (f, thisObj) {
             var source = this;
             return new Generator(function () {
                 var gen = this;
                 source.forEach(function (val) {
-                    gen.yield(f(val));
+                    gen.yield(f.call(thisObj, val));
                 });
             });
         },
