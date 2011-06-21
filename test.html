@@ -370,7 +370,29 @@
         delete arr[3];
         return arrEqual(Generator(arr).toArray(), [2, undefined, "bla", false, "late"]);
     });
-
+    
+    test("groupBy only starts on iteration", function () {
+        var called = false;
+        var grouper = function (x) { called = true; return typeof x; }
+        var g = Generator(a).groupBy(grouper);
+        if (called)
+            return false;
+        g.evaluated();
+        return called;
+    });
+    
+    test("groupBy re-groups everytime", function () {
+        var arr = [1, 2, -1];
+        var g = Generator(arr).groupBy(function (v) { return v > 0; });
+        var first = g.map(function (x) { return x.toArray(); }).toArray();
+        arr[1] = -2;
+        var second = g.map(function (x) { return x.toArray(); }).toArray();
+        
+        var good = first.length === 2 && second.length === 2;
+        good = good && arrEqual(first[0], [1, 2]) && arrEqual(first[1], [-1]);
+        good = good && arrEqual(second[0], [1]) && arrEqual(second[1], [-2, -1]);
+        return good;
+    });
 </script>
 
 

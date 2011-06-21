@@ -212,24 +212,28 @@
             return result;
         },
         groupBy: function (grouper) {
-            var groups = [],
-                group_contents = [];
-                
-            this.forEach(function (val) {
-                var group = grouper(val);
-                var i = arrIndexOf(groups, group);
-                if (i === -1) {
-                    groups.push(group);
-                    group_contents.push([val]);
-                } else {
-                    group_contents[i].push(val);
-                }
-            });
+            var source = this;
+
+            return new Generator(function () {
+                var groups = [],
+                    group_contents = [];
+                    
+                source.forEach(function (val) {
+                    var group = grouper(val);
+                    var i = arrIndexOf(groups, group);
+                    if (i === -1) {
+                        groups.push(group);
+                        group_contents.push([val]);
+                    } else {
+                        group_contents[i].push(val);
+                    }
+                });
             
-            return new Generator(groups).zipWithArray(group_contents, function (group, contents) {
-                var result = new Generator(contents);
-                result.key = group;
-                return result;
+                this.yieldMany(new Generator(groups).zipWithArray(group_contents, function (group, contents) {
+                    var result = new Generator(contents);
+                    result.key = group;
+                    return result;
+                }));
             });
         },
         evaluated: function () {
