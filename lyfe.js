@@ -52,12 +52,25 @@
     var stopIteration = function () {
         throw BreakIteration; 
     };
+    
+    var IterationError = function (message) {
+        this.message = message;
+        this.name = "IterationError";
+    };
+    IterationError.prototype = Error.prototype;
 
     var makeForEach_fromFunction = function (f) {
         return function (g, thisObj) {
-            var index = 0,
+            var stopped = false,
+                index = 0,
                 gen = {
-                    yield: function (val) { var send = g.call(thisObj, val, index, stopIteration); index++; return send; },
+                    yield: function (val) {
+                        if (stopped)
+                            throw new IterationError("yield after end of iteration");
+                        var send = g.call(thisObj, val, index, stopIteration);
+                        index++;
+                        return send;
+                    },
                     yieldMany: function (source) { source.forEach(function (val) { gen.yield(val); }) },
                     stop: stopIteration
                 };
@@ -66,6 +79,8 @@
             } catch (ex) {
                 if (ex !== BreakIteration)
                     throw ex;
+            } finally {
+                stopped = true;
             }
         };
     };
@@ -283,6 +298,7 @@
     Generator.BreakIteration = BreakIteration;
     Generator.Count = Count;
     Generator.Range = Range;
+    Generator.IterationError = IterationError;
     
 })();
 
