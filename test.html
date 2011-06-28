@@ -445,6 +445,36 @@
         return good && arrEqual(seen, [1, "forty-two"]);
     });
 
+    test("yield after exception throws exception", function () {
+        var leaked, good = false, seen = [];
+           
+        var g = Generator(function () {
+            leaked = this.yield;
+            this.yield(1);
+            this.yield("forty-two");
+            this.yield(3);
+        });
+        try {
+            g.forEach(function (val) { seen.push(val); if (typeof val === "string") null(); });
+        } catch (e) {
+            if (!e instanceof TypeError)
+                throw e;
+        }
+        
+        if (!(typeof leaked === "function"))
+            return false;
+            
+        try {
+            leaked("boo");
+        } catch (e) {
+            if (e instanceof Generator.IterationError && e.message === "yield after end of iteration")
+                good = true;
+            else
+                throw e;
+        }
+        return good && arrEqual(seen, [1, "forty-two"]);
+    });
+
 </script>
 
 
