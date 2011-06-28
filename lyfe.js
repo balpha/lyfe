@@ -29,7 +29,7 @@
         arrIndexOf = function (arr, val) {
             var len = arr.length;
             for (var i = 0; i < len; i++)
-                if (arr[i] === val)
+                if (i in arr && arr[i] === val)
                     return i;
             return -1;
         };
