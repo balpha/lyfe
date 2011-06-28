@@ -128,6 +128,11 @@
         var b = [ "more", 2 / 7, { key: "value" } ];
         return arrEqual(Generator(a).and(Generator(b)).toArray(), a.concat(b));
     });
+
+    test("and with array", function () {
+        var b = [ "more", 2 / 7, { key: "value" } ];
+        return arrEqual(Generator(a).and(b).toArray(), a.concat(b));
+    });
     
     test("takeWhile", function () {
         var noFunctions = Generator(a).takeWhile(function (val) { return typeof val !== "function" }).toArray();
@@ -318,6 +323,25 @@
         };
         
         return arrEqual(flatten(nested).toArray(), [1, 7, 9, 3, 1, 8, 5, 2, 2, 3, 4]);
+    });
+
+    test("yieldMany with array", function () {
+        
+        var nested = [ [1, 7], 9, [3, [1, 8], 5], [2, [2, 3, 4]]];
+        
+        var flatten = function (element) {
+            if (typeof element === "number")
+                return [element];
+            
+            return Generator(function () {
+                var that = this;
+                Generator(element).forEach(function (val) {
+                    that.yieldMany(flatten(val));
+                });
+            }).toArray();
+        };
+        
+        return arrEqual(flatten(nested), [1, 7, 9, 3, 1, 8, 5, 2, 2, 3, 4]);
     });
     
     test("changing source array", function () {

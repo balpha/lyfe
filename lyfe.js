@@ -48,6 +48,13 @@
         else
             this.forEach = makeForEach_fromObject(source);
     };
+    
+    var asGenerator = function (source) {
+        if (source instanceof Generator)
+            return source;
+            
+        return new Generator(source);
+    };
 
     var stopIteration = function () {
         throw BreakIteration; 
@@ -71,7 +78,7 @@
                         index++;
                         return send;
                     },
-                    yieldMany: function (source) { source.forEach(function (val) { gen.yield(val); }) },
+                    yieldMany: function (source) { asGenerator(source).forEach(function (val) { gen.yield(val); }) },
                     stop: stopIteration
                 };
             try {
