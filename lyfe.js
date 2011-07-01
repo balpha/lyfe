@@ -282,6 +282,9 @@
         },
         evaluated: function () {
             return new Generator(this.toArray());
+        },
+        except: function (what) {
+            return this.filter(function (x) { return x !== what; });
         }
     }
 

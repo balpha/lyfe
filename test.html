@@ -498,7 +498,13 @@
         }
         return good && arrEqual(seen, [1, "forty-two"]);
     });
-
+    
+    test("except", function() {
+        var good = arrEqual(Generator(a).except(helloWorld).toArray(), [13, null, -10.5, "lolcat"]);
+        good = good && arrEqual(Generator([1, 3, 3, 7]).except(3).toArray(), [1, 7]);
+        return good;
+    });
+        
 </script>
 
 
