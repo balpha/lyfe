@@ -285,6 +285,31 @@
         },
         except: function (what) {
             return this.filter(function (x) { return x !== what; });
+        },
+        sortBy: function (keyFunc) {
+            var source = this;
+            return new Generator(function () {
+                var arr = source.toArray(),
+                    indexes = Range(0, arr.length).toArray(),
+                    gen = this;
+                
+                indexes.sort(function (a, b) {
+                    var ka = keyFunc(arr[a]),
+                        kb = keyFunc(arr[b]);
+                    if (typeof ka === typeof kb) {
+                        if (ka === kb)
+                            return a < b ? -1 : 1;
+                        if (ka < kb)
+                            return -1;
+                        if (ka > kb)
+                            return 1;
+                    }
+                    throw new TypeError("cannot compare " + ka + " and " + kb);
+                });
+                new Generator(indexes).forEach(function (index) {
+                    gen.yield(arr[index]);
+                });
+            });
         }
     }
 

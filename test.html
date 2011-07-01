@@ -504,7 +504,34 @@
         good = good && arrEqual(Generator([1, 3, 3, 7]).except(3).toArray(), [1, 7]);
         return good;
     });
-        
+    
+    test("sortBy", function () {
+        return arrEqual(Generator(a).sortBy(function (x) { return typeof x; }).toArray(), [helloWorld, 13, -10.5, null, "lolcat"]);
+    });
+
+    test("sortBy is (probably) stable", function () {
+        var realSort = Array.prototype.sort;
+        Array.prototype.sort = function (f) { this.reverse(); realSort.call(this, f); };
+        var good = arrEqual(Generator(a).sortBy(function (x) { return typeof x; }).toArray(), [helloWorld, 13, -10.5, null, "lolcat"]);
+        Array.prototype.sort = realSort;
+        return good;
+    });
+    
+    test("sortBy is cranky", function () {
+        var good = false;
+        try {
+            Generator(a).sortBy(function (x) { return NaN; }).toArray();
+        } catch (e) {
+            good = e instanceof TypeError && /^cannot compare/.test(e.message);
+        }
+        try {
+            var v = true;
+            Generator(a).sortBy(function (x) { v = !v; return v ? "0" : 0; }).toArray();
+        } catch (e) {
+            good = good && e instanceof TypeError && /^cannot compare/.test(e.message);
+        }
+        return good;
+    });
 </script>
 
 
