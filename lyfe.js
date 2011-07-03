@@ -227,20 +227,20 @@
                 });                    
             });
         },
-        all: function () {
+        all: function (pred) {
             var result = true;
             this.forEach(function (val, index, stop) {
-                if (!val) {
+                if (!(pred ? pred(val) : val)) {
                     result = false;
                     stop();
                 }
             });
             return result;
         },
-        any: function () {
+        any: function (pred) {
             var result = false;
             this.forEach(function (val, index, stop) {
-                if (val) {
+                if (pred ? pred(val) : val) {
                     result = true;
                     stop();
                 }

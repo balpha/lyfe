@@ -532,6 +532,18 @@
         }
         return good;
     });
+    
+    test("any with predicate", function () {
+        var good = Generator(a).any(function (x) { return typeof x === "function" });
+        good = good && !Generator([-3, -7, 0]).any(function (x) { return x > 0; });
+        return good;
+    });
+
+    test("all with predicate", function () {
+        var good = !Generator(a).all(function (x) { return typeof x === "function" });
+        good = good && Generator([-3, -7, 0]).all(function (x) { return x <= 0; });
+        return good;
+    });
 </script>
 
 
