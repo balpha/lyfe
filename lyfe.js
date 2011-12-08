@@ -1,5 +1,5 @@
 /*!
- * Copyright (c) 2011 Benjamin Dumke
+ * Copyright (c) 2011 Benjamin Dumke-von der Ehe
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -70,19 +70,18 @@
         return function (g, thisObj) {
             var stopped = false,
                 index = 0,
-                gen = {
-                    yield: function (val) {
-                        if (stopped)
-                            throw new IterationError("yield after end of iteration");
-                        var send = g.call(thisObj, val, index, stopIteration);
-                        index++;
-                        return send;
-                    },
-                    yieldMany: function (source) { asGenerator(source).forEach(function (val) { gen.yield(val); }) },
-                    stop: stopIteration
+                Yield = function (val) {
+                    if (stopped)
+                        throw new IterationError("yield after end of iteration");
+                    var send = g.call(thisObj, val, index, stopIteration);
+                    index++;
+                    return send;
+                },
+                yieldMany = function (source) {
+                    asGenerator(source).forEach(function (val) { Yield(val); })
                 };
             try {
-                f.call(gen);
+                f.call({"yield": Yield, yieldMany: yieldMany, stop: stopIteration}, Yield, yieldMany);
             } catch (ex) {
                 if (ex !== BreakIteration)
                     throw ex;
@@ -93,19 +92,19 @@
     };
     
     var makeForEach_fromArray = function (arr) {
-        return makeForEach_fromFunction(function () {
+        return makeForEach_fromFunction(function (Yield) {
             var len = arr.length;
             for (var i = 0; i < len; i++)
                 if (i in arr)
-                    this.yield(arr[i]);
+                    Yield(arr[i]);
         });
     };
     
     var makeForEach_fromObject = function (obj) {
-        return makeForEach_fromFunction(function () {
+        return makeForEach_fromFunction(function (Yield) {
             for (var key in obj)
                 if (obj.hasOwnProperty(key))
-                    this.yield([key, obj[key]]);
+                    Yield([key, obj[key]]);
         });
     };
 
@@ -117,41 +116,37 @@
         },
         filter: function (pred, thisObj) {
             var source = this;
-            return new Generator(function () {
-                var gen = this;
+            return new Generator(function (Yield) {
                 source.forEach(function (val) {
                     if (pred.call(thisObj, val))
-                        gen.yield(val);
+                        Yield(val);
                 });
             });
         },
         take: function (n) {
             var source = this;
-            return new Generator(function () {
-                var gen = this;
-                source.forEach(function (val, index) {
+            return new Generator(function (Yield) {
+                source.forEach(function (val, index, stop) {
                     if (index >= n)
-                        gen.stop();
-                    gen.yield(val);
+                        stop();
+                    Yield(val);
                 });
             });
         },
         skip: function (n) {
             var source = this;
-            return new Generator(function () {
-                var gen = this;
+            return new Generator(function (Yield) {
                 source.forEach(function(val, index) {
                     if (index >= n)
-                        gen.yield(val);
+                        Yield(val);
                 });
             });
         },
         map: function (f, thisObj) {
             var source = this;
-            return new Generator(function () {
-                var gen = this;
+            return new Generator(function (Yield) {
                 source.forEach(function (val) {
-                    gen.yield(f.call(thisObj, val));
+                    Yield(f.call(thisObj, val));
                 });
             });
         },
@@ -161,14 +156,13 @@
             
             var source = this;
             
-            return new Generator(function () {
-                var len = arr.length,
-                    gen = this;
+            return new Generator(function (Yield) {
+                var len = arr.length;
                     
-                source.forEach(function (val, index) {
+                source.forEach(function (val, index, stop) {
                     if (index >= len)
-                        gen.stop();
-                    gen.yield(zipper(val, arr[index]));
+                        stop();
+                    Yield(zipper(val, arr[index]));
                 });
             });
         },
@@ -195,35 +189,33 @@
         },
         and: function (other) {
             var source = this;
-            return new Generator(function () {
-                this.yieldMany(source);
-                this.yieldMany(other);
+            return new Generator(function (Yield, yieldMany) {
+                yieldMany(source);
+                yieldMany(other);
             });
         },
         takeWhile: function (pred) {
             var source = this;
             
-            return new Generator(function () {
-                var gen = this;
-                source.forEach(function (val) {
+            return new Generator(function (Yield) {
+                source.forEach(function (val, index, stop) {
                     if (pred(val))
-                        gen.yield(val);
+                        Yield(val);
                     else
-                        gen.stop();
+                        stop();
                 });
             });
         },
         skipWhile: function (pred) {
             var source = this;
             
-            return new Generator(function () {
-                var gen = this,
-                    skipping = true;
+            return new Generator(function (Yield) {
+                var skipping = true;
                     
                 source.forEach(function (val) {
                     skipping = skipping && pred(val);
                     if (!skipping)
-                        gen.yield(val);
+                        Yield(val);
                 });                    
             });
         },
@@ -258,7 +250,7 @@
         groupBy: function (grouper) {
             var source = this;
 
-            return new Generator(function () {
+            return new Generator(function (Yield, yieldMany) {
                 var groups = [],
                     group_contents = [];
                     
@@ -273,7 +265,7 @@
                     }
                 });
             
-                this.yieldMany(new Generator(groups).zipWithArray(group_contents, function (group, contents) {
+                yieldMany(new Generator(groups).zipWithArray(group_contents, function (group, contents) {
                     var result = new Generator(contents);
                     result.key = group;
                     return result;
@@ -288,10 +280,9 @@
         },
         sortBy: function (keyFunc) {
             var source = this;
-            return new Generator(function () {
+            return new Generator(function (Yield) {
                 var arr = source.toArray(),
-                    indexes = Range(0, arr.length).toArray(),
-                    gen = this;
+                    indexes = Range(0, arr.length).toArray();
                 
                 indexes.sort(function (a, b) {
                     var ka = keyFunc(arr[a]),
@@ -307,7 +298,7 @@
                     throw new TypeError("cannot compare " + ka + " and " + kb);
                 });
                 new Generator(indexes).forEach(function (index) {
-                    gen.yield(arr[index]);
+                    Yield(arr[index]);
                 });
             });
         }
@@ -317,9 +308,9 @@
         var i = start;
         if (typeof step === "undefined")
             step = 1;
-        return new Generator(function () {
+        return new Generator(function (Yield) {
             while (true) {
-                this.yield(i);
+                Yield(i);
                 i += step;
             }
         });

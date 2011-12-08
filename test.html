@@ -5,6 +5,7 @@
 <script>
 
     function test(name, testFunction) {
+        document.write("<div style='float:left; width: 50%;'>");
         document.write(name + ": ");
         var result, exception;
         try {
@@ -12,12 +13,14 @@
         } catch (e) {
             exception = e;
         }
+        
         if (result)
-            document.write("<b style='color:green'>passed</b><br>");
+            document.write("<b style='color:green'>passed</b>");
         else if (exception)            
-            document.write("<b style='color:red'>exception: " + exception.message + "</b><br>");
+            document.write("<b style='color:red'>exception: " + exception.message + "</b>");
         else
-            document.write("<b style='color:red'>failed</b><br>");
+            document.write("<b style='color:red'>failed</b>");
+        document.write("</div>");
     }
 
     function arrEqual (a1, a2) {
@@ -45,13 +48,24 @@
         return arrEqual(a, roundtrip);
     });
     
-    test("function constructor", function () {
+    test("function constructor with this.yield", function () {
         var g = Generator(function () {
             this.yield(13);
             this.yield(null);
             this.yield(helloWorld);
             this.yield(-10.5);
             this.yield("lolcat");
+        });
+        return arrEqual(a, g.toArray());
+    });
+    
+    test("function constructor with parameter Yield", function () {
+        var g = Generator(function (Yield) {
+            Yield(13);
+            Yield(null);
+            Yield(helloWorld);
+            Yield(-10.5);
+            Yield("lolcat");
         });
         return arrEqual(a, g.toArray());
     });
@@ -215,7 +229,7 @@
     
     });
     
-    test("send to yield", function () {
+    test("send to yieldwith this.yield", function () {
         var gen = Generator(function () {
             this.yield("first");
             var other = this.yield("second");
@@ -229,8 +243,24 @@
         });
         return arrEqual(arr, ["first", "second", "third", "end"]);
     });
+
+    test("send to yield with parameter Yield", function () {
+        var gen = Generator(function (Yield) {
+            Yield("first");
+            var other = this.yield("second");
+            Yield(other);
+            Yield("end");
+        });
+        var arr = [];
+        gen.forEach(function (val) {
+            arr.push(val);
+            return "third";
+        });
+        return arrEqual(arr, ["first", "second", "third", "end"]);
+    });
     
-    test("stop", function () {
+    
+    test("stop with this.yield", function () {
         var good = true;
         var gen = Generator(function () {
             this.yield(42);
@@ -248,7 +278,25 @@
         return good && lastValue === -5;
     });
        
-    test("cleanup when stopping outer", function () {
+    test("stop with parameter Yield", function () {
+        var good = true;
+        var gen = Generator(function (Yield) {
+            Yield(42);
+            Yield(1337);
+            Yield(-5);
+            good = false;
+            Yield(100);
+        });
+        var lastValue;
+        gen.forEach(function (val, index, stop) {
+            lastValue = val;
+            if (val < 0)
+                stop();
+        });
+        return good && lastValue === -5;
+    });
+       
+    test("cleanup when stopping outer with this.yield", function () {
         var innerClean = false,
             outerClean = false;
         
@@ -277,7 +325,36 @@
         return arrEqual(result, [1, 2]) && innerClean && outerClean;
     });
 
-    test("cleanup when stopping inner", function () {
+    test("cleanup when stopping outer with paramater Yield", function () {
+        var innerClean = false,
+            outerClean = false;
+        
+        var inner = Generator(function (Yield, yieldMany) {
+            try {
+                yieldMany(Generator([1, 2, 3, 4]));
+            } finally {
+                innerClean = true;
+            }
+        });
+        
+        var outer = Generator(function (Yield) {
+            var that = this;
+            try {
+                inner.forEach(function (val, index) {
+                    Yield(val);
+                    if (val > 1)
+                        that.stop();
+                });
+            } finally {
+                outerClean = true;
+            }
+        });
+
+        var result = outer.toArray();
+        return arrEqual(result, [1, 2]) && innerClean && outerClean;
+    });
+
+    test("cleanup when stopping inner with this.yield", function () {
         var innerClean = false,
             outerClean = false;
         
@@ -306,7 +383,36 @@
         return arrEqual(result, [1, 2]) && innerClean && outerClean;
     });
     
-    test("yieldMany", function () {
+    test("cleanup when stopping inner with parameter Yield", function () {
+        var innerClean = false,
+            outerClean = false;
+        
+        var inner = Generator(function (Yield, yieldMany) {
+            try {
+                yieldMany(Generator([1, 2, 3, 4]));
+            } finally {
+                innerClean = true;
+            }
+        });
+        
+        var outer = Generator(function (Yield) {
+            var that = this;
+            try {
+                inner.forEach(function (val, index, stop) {
+                    Yield(val);
+                    if (val > 1)
+                        stop();
+                });
+            } finally {
+                outerClean = true;
+            }
+        });
+
+        var result = outer.toArray();
+        return arrEqual(result, [1, 2]) && innerClean && outerClean;
+    });
+    
+    test("this.yieldMany", function () {
         
         var nested = [ [1, 7], 9, [3, [1, 8], 5], [2, [2, 3, 4]]];
         
@@ -325,7 +431,25 @@
         return arrEqual(flatten(nested).toArray(), [1, 7, 9, 3, 1, 8, 5, 2, 2, 3, 4]);
     });
 
-    test("yieldMany with array", function () {
+    test("parameter yieldMany", function () {
+        
+        var nested = [ [1, 7], 9, [3, [1, 8], 5], [2, [2, 3, 4]]];
+        
+        var flatten = function (element) {
+            if (typeof element === "number")
+                return Generator([element]);
+            
+            return Generator(function (Yield, yieldMany) {
+                Generator(element).forEach(function (val) {
+                    yieldMany(flatten(val));
+                });
+            });
+        };
+        
+        return arrEqual(flatten(nested).toArray(), [1, 7, 9, 3, 1, 8, 5, 2, 2, 3, 4]);
+    });
+
+    test("this.yieldMany with array", function () {
         
         var nested = [ [1, 7], 9, [3, [1, 8], 5], [2, [2, 3, 4]]];
         
@@ -337,6 +461,24 @@
                 var that = this;
                 Generator(element).forEach(function (val) {
                     that.yieldMany(flatten(val));
+                });
+            }).toArray();
+        };
+        
+        return arrEqual(flatten(nested), [1, 7, 9, 3, 1, 8, 5, 2, 2, 3, 4]);
+    });
+    
+    test("parameter yieldMany with array", function () {
+        
+        var nested = [ [1, 7], 9, [3, [1, 8], 5], [2, [2, 3, 4]]];
+        
+        var flatten = function (element) {
+            if (typeof element === "number")
+                return [element];
+            
+            return Generator(function (Yield, yieldMany) {
+                Generator(element).forEach(function (val) {
+                    yieldMany(flatten(val));
                 });
             }).toArray();
         };
