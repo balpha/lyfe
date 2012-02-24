@@ -686,6 +686,13 @@
         good = good && Generator([-3, -7, 0]).all(function (x) { return x <= 0; });
         return good;
     });
+    
+    test("count", function () {
+        var good = Generator(a).count() === 5 && Generator([]).count() === 0;
+        var withHole = [1,2,3,,4];
+        return good && Generator(withHole).count() === 4;
+    })
+    
 </script>
 
 

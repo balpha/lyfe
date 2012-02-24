@@ -301,6 +301,11 @@
                     Yield(arr[index]);
                 });
             });
+        },
+        count: function () {
+            var result = 0;
+            this.forEach(function () { result++; });
+            return result;
         }
     }
 
