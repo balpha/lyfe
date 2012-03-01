@@ -107,6 +107,12 @@
                     Yield([key, obj[key]]);
         });
     };
+    
+    var selector = function (f) {
+        if (typeof f === "string")
+            return function (o) { return o[f]; }
+        return f;
+    }
 
     Generator.prototype = {
         toArray: function () {
@@ -116,6 +122,7 @@
         },
         filter: function (pred, thisObj) {
             var source = this;
+            pred = selector(pred);
             return new Generator(function (Yield) {
                 source.forEach(function (val) {
                     if (pred.call(thisObj, val))
@@ -144,6 +151,7 @@
         },
         map: function (f, thisObj) {
             var source = this;
+            f = selector(f);
             return new Generator(function (Yield) {
                 source.forEach(function (val) {
                     Yield(f.call(thisObj, val));
@@ -196,7 +204,7 @@
         },
         takeWhile: function (pred) {
             var source = this;
-            
+            pred = selector(pred);
             return new Generator(function (Yield) {
                 source.forEach(function (val, index, stop) {
                     if (pred(val))
@@ -208,7 +216,7 @@
         },
         skipWhile: function (pred) {
             var source = this;
-            
+            pred = selector(pred);
             return new Generator(function (Yield) {
                 var skipping = true;
                     
@@ -221,6 +229,7 @@
         },
         all: function (pred) {
             var result = true;
+            pred = selector(pred);
             this.forEach(function (val, index, stop) {
                 if (!(pred ? pred(val) : val)) {
                     result = false;
@@ -231,6 +240,7 @@
         },
         any: function (pred) {
             var result = false;
+            pred = selector(pred);
             this.forEach(function (val, index, stop) {
                 if (pred ? pred(val) : val) {
                     result = true;
@@ -249,7 +259,7 @@
         },
         groupBy: function (grouper) {
             var source = this;
-
+            grouper = selector(grouper);
             return new Generator(function (Yield, yieldMany) {
                 var groups = [],
                     group_contents = [];
@@ -280,6 +290,7 @@
         },
         sortBy: function (keyFunc) {
             var source = this;
+            keyFunc = selector(keyFunc);
             return new Generator(function (Yield) {
                 var arr = source.toArray(),
                     indexes = Range(0, arr.length).toArray();

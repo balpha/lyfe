@@ -691,6 +691,65 @@
         var good = Generator(a).count() === 5 && Generator([]).count() === 0;
         var withHole = [1,2,3,,4];
         return good && Generator(withHole).count() === 4;
+    });
+    var o0 = {foo: 12, bar: "hello"},
+        o1 = {foo: -3, bar: false},
+        o2 = {foo: 0, bar: null},
+        o3 = {foo: 42, bar: "hello"},
+        o4 = {foo: -1},
+        objects = Generator([o0, o1, o2, o3, o4]);
+        
+    function testSelector(method, expectFoo, expectBar) {
+        test(method + " with string", function () {
+            return arrEqual(objects[method]("foo").toArray(), expectFoo) && arrEqual(objects[method]("bar").toArray(), expectBar);
+        });
+    }
+    
+    testSelector("filter", [o0, o1, o3, o4], [o0, o3]);
+    testSelector("map", [12, -3, 0, 42, -1], ["hello", false, null, "hello", undefined]);
+    testSelector("takeWhile", [o0, o1], [o0]);
+    testSelector("skipWhile", [o2, o3, o4], [o1, o2, o3, o4]);
+    test("all with string", function () {
+        var good = !objects.all("foo");
+        good = good && Generator([]).all("foo");
+        good = good && objects.except(o2).all("foo");
+        good = good && !objects.all("bar");
+        good = good && Generator([o0, o3]).all("bar");
+        good = good && !Generator([o0, o3, o4]).all("bar");
+        return good;
+    });
+    test("any with string", function () {
+        var good = objects.any("foo");
+        good = good && !Generator([]).any("foo");
+        good = good && objects.any("bar");
+        good = good && !Generator([o1, o2, o4]).any("bar");
+        good = good && objects.except(o0).any("bar");
+        return good;
+    });
+    test("groupBy with string", function () {
+        var grouped = objects.groupBy("bar");
+        var expected_groups = ["hello", false, null, undefined];
+        var expected_contents = [
+            [o0, o3],
+            [o1],
+            [o2],
+            [o4]
+        ]
+        var good = true;
+        grouped.forEach(function (val) {
+            var g = expected_groups.shift(),
+                e = expected_contents.shift();
+            if (val.key !== g) {
+                good = false;
+                return;
+            }
+            if (!arrEqual(val.toArray(), e))
+                good = false;
+        });
+        return good;
+    });
+    test("sortBy with string", function () {
+        return arrEqual(objects.sortBy("foo").toArray(), [o1, o4, o2, o0, o3])
     })
     
 </script>
