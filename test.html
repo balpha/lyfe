@@ -117,6 +117,16 @@
         return arrEqual(zipped, ["nu", "obje", "fun", "n", "str"]);
     });
     
+    test("changing source array in zipWithArray", function () {
+        var arr = [2, 4, 3, 1];
+        var zipGen = Generator(a).zipWithArray(arr, function (a, b) { return (typeof a).substr(0, b); });
+        var zipped1 = zipGen.toArray();
+        arr.push(1, 2);
+        arr.shift();
+        var zipped2 = zipGen.toArray();
+        return arrEqual(zipped2, ["numb", "obj", "f", "n", "st"]);
+    });
+    
     test("reduce", function () {
         var sixFactorial = Generator([1, 2, 3, 4, 5, 6]).reduce(function (a, b) { return a * b; });
         return sixFactorial === 720;
