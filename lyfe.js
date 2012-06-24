@@ -81,7 +81,7 @@
                     asGenerator(source).forEach(function (val) { Yield(val); })
                 };
             try {
-                f.call({"yield": Yield, yieldMany: yieldMany, stop: stopIteration}, Yield, yieldMany);
+                f(Yield, yieldMany, stopIteration);
             } catch (ex) {
                 if (ex !== BreakIteration)
                     throw ex;
