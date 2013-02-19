@@ -340,7 +340,7 @@
         return Count(start, 1).take(len);
     }
 
-    window.Generator = Generator;
+    this.Generator = Generator;
     Generator.BreakIteration = BreakIteration;
     Generator.Count = Count;
     Generator.Range = Range;
