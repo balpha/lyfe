@@ -165,12 +165,16 @@
             var source = this;
             
             return new Generator(function (Yield) {
-                var len = arr.length;
+                var len = arr.length,
+                    delta = 0;
                     
                 source.forEach(function (val, index, stop) {
-                    if (index >= len)
+                    while (!(index + delta in arr) && index + delta < len)
+                        delta++;
+                    if (index + delta >= len)
                         stop();
-                    Yield(zipper(val, arr[index]));
+                    
+                    Yield(zipper(val, arr[index + delta]));
                 });
             });
         },

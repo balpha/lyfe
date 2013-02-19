@@ -617,7 +617,14 @@
     });
     test("sortBy with string", function () {
         return arrEqual(objects.sortBy("foo").toArray(), [o1, o4, o2, o0, o3])
-    })
+    });
+    test("zipWithArray behaves consistently with arrays with holes", function () {
+        var a = [13,,7];
+        var b = [4,9,,];
+        var r1 = Generator(a).zipWithArray(b, function (x, y) { return x + y }).toArray();
+        var r2 = Generator(b).zipWithArray(a, function (x, y) { return x + y }).toArray();
+        return arrEqual(r1, r2);
+    });
     
 </script>
 
