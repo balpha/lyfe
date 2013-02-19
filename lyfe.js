@@ -112,7 +112,7 @@
         if (typeof f === "string")
             return function (o) { return o[f]; }
         return f;
-    }
+    };
 
     Generator.prototype = {
         toArray: function () {
@@ -322,7 +322,7 @@
             this.forEach(function () { result++; });
             return result;
         }
-    }
+    };
 
     var Count = function (start, step) {
         var i = start;
@@ -334,11 +334,11 @@
                 i += step;
             }
         });
-    }
+    };
 
     var Range = function (start, len) {
         return Count(start, 1).take(len);
-    }
+    };
 
     this.Generator = Generator;
     Generator.BreakIteration = BreakIteration;
