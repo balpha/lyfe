@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
  
-(function () {
+(function (global) {
 
     var arrIndexOf;
     if (Array.prototype.indexOf) {
@@ -340,11 +340,16 @@
         return Count(start, 1).take(len);
     };
 
-    this.Generator = Generator;
+    var originalGenerator = global.Generator;
+    global.Generator = Generator;
     Generator.BreakIteration = BreakIteration;
     Generator.Count = Count;
     Generator.Range = Range;
     Generator.IterationError = IterationError;
+    Generator.noConflict = function () {
+        global.Generator = originalGenerator;
+        return Generator;
+    }
     
-})();
+})(this);
 

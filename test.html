@@ -1,6 +1,11 @@
 <!doctype html>
 <html>
 <head>
+<script>
+    window.Generator = window.oldGenerator = {};
+</script>
+
+
 <script src="lyfe.js"></script>
 <script>
 
@@ -43,6 +48,19 @@
     var helloWorld = function () { alert("hello world"); };
     var a = [13, null, helloWorld, -10.5, "lolcat"];
 
+    test("noConflict", function () {
+        var newGenerator = window.Generator;
+        if (newGenerator === oldGenerator)
+            return false;
+        var localGenerator = newGenerator.noConflict();
+        if (localGenerator !== newGenerator)
+            return false;
+        if (window.Generator !== oldGenerator)
+            return false;
+        window.Generator = newGenerator;
+        return true;        
+    });
+    
     test("array constructor", function () {
         var roundtrip = Generator(a).toArray();
         return arrEqual(a, roundtrip);
@@ -625,7 +643,6 @@
         var r2 = Generator(b).zipWithArray(a, function (x, y) { return x + y }).toArray();
         return arrEqual(r1, r2);
     });
-    
 </script>
 
 
