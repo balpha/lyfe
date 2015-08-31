@@ -297,11 +297,12 @@
             keyFunc = selector(keyFunc);
             return new Generator(function (Yield) {
                 var arr = source.toArray(),
-                    indexes = Range(0, arr.length).toArray();
+                    indexes = Range(0, arr.length).toArray(),
+                    keys = Generator(arr).map(keyFunc).toArray();
                 
                 indexes.sort(function (a, b) {
-                    var ka = keyFunc(arr[a]),
-                        kb = keyFunc(arr[b]);
+                    var ka = keys[a],
+                        kb = keys[b];
                     if (typeof ka === typeof kb) {
                         if (ka === kb)
                             return a < b ? -1 : 1;

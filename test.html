@@ -559,7 +559,13 @@
         }
         return good;
     });
-    
+
+    test("sortBy calls keyFunc exactly once per element", function () {
+        var n = 0;
+        Generator(a).sortBy(function (x) { n++; return typeof x; }).toArray();
+        return n === a.length;
+    });
+
     test("any with predicate", function () {
         var good = Generator(a).any(function (x) { return typeof x === "function" });
         good = good && !Generator([-3, -7, 0]).any(function (x) { return x > 0; });
